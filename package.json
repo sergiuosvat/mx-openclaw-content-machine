@@ -1,0 +1,30 @@
+{
+    "name": "mx-openclaw-template-solution",
+    "version": "1.0.0",
+    "description": "MultiversX OpenClaw Agent Template — Zero-to-Production in 5 Minutes",
+    "author": "MultiversX",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "launch": "bash launch.sh",
+        "launch:local": "bash launch.sh --local",
+        "setup": "bash scripts/setup.sh",
+        "generate-wallet": "npx ts-node scripts/generate_wallet.ts",
+        "register": "npx ts-node scripts/register.ts",
+        "balance": "npx ts-node scripts/check_balance.ts",
+        "fund": "npx ts-node scripts/fund.ts",
+        "update-manifest": "npx ts-node scripts/update_manifest.ts",
+        "dev": "bash scripts/dev.sh",
+        "build": "bash scripts/build.sh",
+        "provision": "bash infra/provision.sh",
+        "deploy": "bash infra/deploy.sh",
+        "destroy": "bash infra/destroy.sh",
+        "logs": "bash infra/logs.sh",
+        "test": "npm run test:backend && npm run test:frontend",
+        "test:backend": "cd backend && npm test",
+        "test:frontend": "cd frontend && npm test"
+    },
+    "engines": {
+        "node": ">=22.0.0"
+    }
+}

@@ -1,0 +1,72 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Deploy Frontend to Vercel
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# OPTIONAL — Delete this file if you don't use Vercel.
+#
+# To use a DIFFERENT hosting provider, duplicate this file and replace the
+# deploy step with your provider's CLI. Common alternatives:
+#
+#   Netlify:   npx netlify-cli deploy --prod --dir=frontend/dist
+#   Cloudflare Pages:  npx wrangler pages deploy frontend/dist
+#   AWS S3:    aws s3 sync frontend/dist s3://your-bucket --delete
+#   Firebase:  npx firebase-tools deploy --only hosting
+#
+# Required GitHub Secrets:
+#   VERCEL_TOKEN      — Generate at: https://vercel.com/account/tokens
+#   VERCEL_ORG_ID     — From .vercel/project.json after `vercel link`
+#   VERCEL_PROJECT_ID — From .vercel/project.json after `vercel link`
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:  # Manual trigger from GitHub UI
+
+# Only run after CI passes
+# Uncomment the next 2 lines to enforce CI gate:
+# needs: ci
+# if: github.event_name == 'push'
+
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to Vercel
+    runs-on: ubuntu-latest
+
+    # ── Remove or replace this section for other providers ──
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel config
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

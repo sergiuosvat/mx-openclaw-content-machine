@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ==========================================
+   Material Design 3 — Design Tokens
+   ========================================== */
+:root {
+  /* Colors — M3 Tonal Palette */
+  --md-primary: #6750A4;
+  --md-on-primary: #FFFFFF;
+  --md-primary-container: #EADDFF;
+  --md-on-primary-container: #21005E;
+
+  --md-secondary: #625B71;
+  --md-on-secondary: #FFFFFF;
+  --md-secondary-container: #E8DEF8;
+
+  --md-tertiary: #7D5260;
+  --md-tertiary-container: #FFD8E4;
+
+  --md-surface: #FFFBFE;
+  --md-on-surface: #1C1B1F;
+  --md-surface-variant: #E7E0EC;
+  --md-on-surface-variant: #49454F;
+  --md-surface-container: #F3EDF7;
+  --md-surface-container-high: #ECE6F0;
+  --md-surface-container-highest: #E6E0E9;
+
+  --md-outline: #79747E;
+  --md-outline-variant: #CAC4D0;
+
+  --md-error: #B3261E;
+  --md-success: #2E7D32;
+
+  /* Typography */
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* Elevation */
+  --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+  --elevation-2: 0 3px 6px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+  --elevation-3: 0 6px 12px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-primary: #D0BCFF;
+    --md-on-primary: #381E72;
+    --md-primary-container: #4F378B;
+    --md-on-primary-container: #EADDFF;
+
+    --md-secondary: #CCC2DC;
+    --md-secondary-container: #4A4458;
+
+    --md-surface: #1C1B1F;
+    --md-on-surface: #E6E1E5;
+    --md-surface-variant: #49454F;
+    --md-on-surface-variant: #CAC4D0;
+    --md-surface-container: #211F26;
+    --md-surface-container-high: #2B2930;
+    --md-surface-container-highest: #36343B;
+
+    --md-outline: #938F99;
+    --md-outline-variant: #49454F;
+  }
+}
+
+/* ==========================================
+   Global Reset & Base
+   ========================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ==========================================
+   Typography Scale (M3)
+   ========================================== */
+.display-large { font-family: var(--font-display); font-size: 57px; line-height: 64px; font-weight: 400; }
+.display-medium { font-family: var(--font-display); font-size: 45px; line-height: 52px; font-weight: 400; }
+.display-small { font-family: var(--font-display); font-size: 36px; line-height: 44px; font-weight: 400; }
+.headline-large { font-family: var(--font-display); font-size: 32px; line-height: 40px; font-weight: 500; }
+.headline-medium { font-family: var(--font-display); font-size: 28px; line-height: 36px; font-weight: 500; }
+.title-large { font-family: var(--font-display); font-size: 22px; line-height: 28px; font-weight: 500; }
+.title-medium { font-family: var(--font-body); font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: 0.15px; }
+.body-large { font-family: var(--font-body); font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0.5px; }
+.body-medium { font-family: var(--font-body); font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: 0.25px; }
+.label-large { font-family: var(--font-body); font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.1px; }
+.label-medium { font-family: var(--font-body); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.5px; }
+
+/* ==========================================
+   M3 Buttons
+   ========================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-filled {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  box-shadow: var(--elevation-1);
+}
+.btn-filled:hover {
+  box-shadow: var(--elevation-2);
+  filter: brightness(1.08);
+}
+
+.btn-outlined {
+  background: transparent;
+  color: var(--md-primary);
+  border: 1px solid var(--md-outline);
+}
+.btn-outlined:hover {
+  background: var(--md-primary-container);
+}
+
+.btn-tonal {
+  background: var(--md-secondary-container);
+  color: var(--md-on-surface);
+}
+.btn-tonal:hover {
+  box-shadow: var(--elevation-1);
+}
+
+/* ==========================================
+   M3 Cards
+   ========================================== */
+.card {
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--md-surface-container);
+  transition: box-shadow 0.2s ease;
+}
+.card-elevated {
+  box-shadow: var(--elevation-1);
+}
+.card-elevated:hover {
+  box-shadow: var(--elevation-2);
+}
+
+/* ==========================================
+   Utility
+   ========================================== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+a { color: var(--md-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }

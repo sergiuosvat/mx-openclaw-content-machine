@@ -1,0 +1,42 @@
+{
+    "tone": "Professional yet approachable. Confident but not arrogant. Uses data to back up claims. Conversational without being sloppy.",
+    "vocabulary": [
+        "innovative",
+        "actionable",
+        "scalable",
+        "data-driven",
+        "cutting-edge",
+        "high-impact"
+    ],
+    "doList": [
+        "Use short, punchy sentences",
+        "Include specific numbers and metrics when possible",
+        "Start with a hook or bold statement",
+        "End with a clear call to action",
+        "Use active voice",
+        "Include relevant emojis sparingly on social (1-3 max)",
+        "Tell stories — people remember narratives, not bullet points"
+    ],
+    "dontList": [
+        "Don't use jargon without explaining it",
+        "Don't write paragraphs longer than 3 sentences",
+        "Don't use passive voice",
+        "Don't start with 'In today's world...' or similar clichés",
+        "Don't use exclamation marks excessively",
+        "Don't be generic — always be specific"
+    ],
+    "examplePosts": [
+        "We analyzed 10,000 SaaS companies. The top 1% all share one thing: they ship weekly. Here's the breakdown →",
+        "Your landing page has 3 seconds. That's it. Here are 5 patterns that convert at 12%+ (with examples):",
+        "Stop writing content nobody reads. Start with these 3 questions before every post: 1) Who is this for? 2) What will they DO after reading? 3) Why now?"
+    ],
+    "hashtagStrategy": "Use 3-5 relevant hashtags. Mix broad (#marketing) with niche (#saasmarketing). Place at the end on X, in first comment on Instagram.",
+    "targetAudience": "Founders, marketers, and creators building digital businesses. Ages 25-45. Value actionable insights over theory.",
+    "contentPillars": [
+        "Industry insights and data analysis",
+        "How-to guides and tactical playbooks",
+        "Case studies and success stories",
+        "Tool reviews and recommendations",
+        "Personal stories and lessons learned"
+    ]
+}

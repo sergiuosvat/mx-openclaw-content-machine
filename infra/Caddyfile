@@ -1,0 +1,23 @@
+{$DOMAIN} {
+    # Frontend — serve the Next.js app
+    handle /* {
+        reverse_proxy frontend:3000
+    }
+
+    # Backend API — all /api/* routes
+    handle /api/* {
+        reverse_proxy backend:4000
+    }
+
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    # Gzip compression
+    encode gzip
+}

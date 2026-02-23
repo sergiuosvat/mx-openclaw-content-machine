@@ -1,0 +1,38 @@
+{
+    "agentName": "content-machine",
+    "description": "The Content Machine — your AI-powered content operations team. Monitors trends, writes in your brand voice, generates social posts, blogs, video scripts, thumbnails, and manages your content calendar.",
+    "version": "1.0.0",
+    "nonce": 0,
+    "network": "devnet",
+    "pricing": {
+        "perQuery": "0.25",
+        "token": "USDC-350c4e"
+    },
+    "llm": {
+        "provider": "openai",
+        "model": "gpt-4o"
+    },
+    "services": [
+        {
+            "id": "trend-monitoring",
+            "name": "Trend Monitoring",
+            "description": "Scan RSS feeds, Reddit, and the web for trending topics and content ideas",
+            "pricePerCall": "0.10",
+            "token": "USDC-350c4e"
+        },
+        {
+            "id": "content-generation",
+            "name": "Content Generation",
+            "description": "Generate platform-optimized content: social posts, blogs, newsletters, video scripts",
+            "pricePerCall": "0.25",
+            "token": "USDC-350c4e"
+        },
+        {
+            "id": "content-scheduling",
+            "name": "Content Scheduling",
+            "description": "Schedule content and manage a weekly content calendar across platforms",
+            "pricePerCall": "0.05",
+            "token": "USDC-350c4e"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+[package]
+name = "mx-openclaw-template-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+multiversx-sc = "=0.57.1"
+multiversx-sc-snippets = { version = "=0.57.1", features = ["chain-simulator-tests"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+rand = "0.8"
+hex = "0.4"
+bech32 = "0.11"
+base64 = "0.22"
+
+[[test]]
+name = "e2e_agent_lifecycle"
+path = "tests/e2e/agent_lifecycle.rs"
+
+[[test]]
+name = "e2e_payment_flow"
+path = "tests/e2e/payment_flow.rs"
+
+[[test]]
+name = "e2e_full_research_session"
+path = "tests/e2e/full_research_session.rs"

@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Caddyfile — Automatic HTTPS reverse proxy
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Replace "agent.example.com" with your actual domain.
+# Caddy handles SSL certificate provisioning automatically via Let's Encrypt.
+#
+# To customize:
+#   - Add rate limiting:  rate_limit {remote_host} 30r/m
+#   - Add basic auth:     basicauth /admin { user $hashed_password }
+#   - Change ports:       update "backend:4000" to your port
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── API Backend ────────────────────────────────────────────────────────────────
+api.agent.example.com {
+    reverse_proxy backend:4000
+
+    # CORS headers (customize origin for your frontend domain)
+    header Access-Control-Allow-Origin "https://agent.example.com"
+    header Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
+    header Access-Control-Allow-Headers "Content-Type, Authorization"
+
+    # Security headers
+    header X-Content-Type-Options "nosniff"
+    header X-Frame-Options "DENY"
+    header Referrer-Policy "strict-origin-when-cross-origin"
+}
+
+# ── Frontend (if not using Vercel) ─────────────────────────────────────────────
+agent.example.com {
+    reverse_proxy frontend:3000
+
+    # Security headers
+    header X-Content-Type-Options "nosniff"
+    header X-Frame-Options "SAMEORIGIN"
+}

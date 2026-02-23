@@ -1,0 +1,70 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker Compose — Full-stack OpenClaw Agent
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# OPTIONAL — Only needed if deploying to a VPS with Docker.
+#
+# Quick start:
+#   cp .env.example .env   # Then fill in your values
+#   docker compose up -d
+#
+# To customize:
+#   - Remove `caddy` if you handle HTTPS elsewhere (Cloudflare, nginx, etc.)
+#   - Remove `frontend` if deploying to Vercel
+#   - Add services: database, redis, etc.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  # ── Backend API ──────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: openclaw-backend
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+    env_file: .env
+    volumes:
+      - ./uploads:/app/uploads # Persistent file uploads
+      - ./reports:/app/reports # Generated reports
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:4000/api/health" ]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ── Frontend (Optional — remove if using Vercel) ─────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: openclaw-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Caddy Reverse Proxy (Optional — auto-HTTPS) ─────────────────────────────
+  # Remove this if you use Cloudflare, nginx, or don't need HTTPS.
+  caddy:
+    image: caddy:2-alpine
+    container_name: openclaw-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

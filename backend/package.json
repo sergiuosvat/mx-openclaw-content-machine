@@ -1,0 +1,52 @@
+{
+    "name": "mx-openclaw-backend",
+    "version": "1.0.0",
+    "description": "Backend API server for mx-openclaw-template-solution",
+    "main": "dist/server.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+        "test": "jest --forceExit --detectOpenHandles",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "lint": "eslint src/ --max-warnings 0",
+        "lint:fix": "eslint src/ --fix"
+    },
+    "dependencies": {
+        "@multiversx/sdk-core": "^15.0.0",
+        "@multiversx/sdk-network-providers": "^2.0.0",
+        "@multiversx/sdk-wallet": "^4.0.0",
+        "axios": "^1.7.0",
+        "better-sqlite3": "^12.6.2",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.0",
+        "express": "^4.21.0",
+        "express-rate-limit": "^8.2.1",
+        "helmet": "^8.1.0",
+        "morgan": "^1.10.1",
+        "multer": "^1.4.5-lts.1",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/better-sqlite3": "^7.6.13",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/jest": "^29.5.0",
+        "@types/morgan": "^1.9.10",
+        "@types/multer": "^1.4.12",
+        "@types/node": "^22.0.0",
+        "@types/supertest": "^6.0.0",
+        "@types/uuid": "^10.0.0",
+        "@typescript-eslint/eslint-plugin": "^8.56.0",
+        "@typescript-eslint/parser": "^8.56.0",
+        "eslint": "^10.0.1",
+        "jest": "^29.7.0",
+        "supertest": "^7.0.0",
+        "ts-jest": "^29.2.0",
+        "ts-node": "^10.9.0",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.6.0"
+    }
+}

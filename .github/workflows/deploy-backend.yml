@@ -1,0 +1,139 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Deploy Backend to VPS via SSH + Docker
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# OPTIONAL — Delete this file if you don't deploy to a VPS.
+#
+# To use a DIFFERENT deployment target, replace the SSH deploy step:
+#
+#   Google Cloud Run:
+#     gcloud run deploy $SERVICE --image gcr.io/$PROJECT/$IMAGE --region $REGION
+#
+#   Railway:
+#     npx @railway/cli deploy --service backend
+#
+#   Fly.io:
+#     flyctl deploy --config backend/fly.toml
+#
+#   AWS ECS:
+#     aws ecs update-service --cluster $CLUSTER --service $SERVICE --force
+#
+#   Render:
+#     curl -X POST $RENDER_DEPLOY_HOOK_URL
+#
+# Required GitHub Secrets (for VPS/SSH deploy):
+#   VPS_HOST     — IP address or hostname of your server
+#   VPS_USER     — SSH user (default: deploy)
+#   VPS_SSH_KEY  — Private SSH key for authentication
+#   WALLET_PEM   — Agent wallet PEM (injected into VPS .env securely)
+#   LLM_API_KEY  — LLM provider API key (injected into VPS .env securely)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - 'Dockerfile'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:  # Manual trigger
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # ── CONFIGURABLE: Change these to match your VPS setup ──
+  DEPLOY_DIR: /opt/openclaw
+  DOCKER_SERVICE: backend
+
+jobs:
+  deploy:
+    name: 🐳 Deploy to VPS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Step 1: Set up SSH ──
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      # ── Step 2: Sync code to VPS ──
+      - name: Sync project files
+        run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude '.env' \
+            --exclude '*.pem' \
+            --exclude '*.db' \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            ./ ${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }}:${{ env.DEPLOY_DIR }}/
+
+      # ── Step 3: Inject secrets into VPS .env (never committed) ──
+      - name: Write secrets to VPS .env
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
+            cd ${{ env.DEPLOY_DIR }}
+
+            # Merge .env.example with injected secrets
+            # Non-secret values come from .env.example, secrets are appended
+            if [ ! -f .env ]; then
+              cp .env.example .env
+              echo "Created .env from .env.example"
+            fi
+
+            # Inject/update secrets (idempotent)
+            grep -q "^LLM_API_KEY=" .env && \
+              sed -i "s|^LLM_API_KEY=.*|LLM_API_KEY=${{ secrets.LLM_API_KEY }}|" .env || \
+              echo "LLM_API_KEY=${{ secrets.LLM_API_KEY }}" >> .env
+
+            grep -q "^NODE_ENV=" .env && \
+              sed -i "s|^NODE_ENV=.*|NODE_ENV=production|" .env || \
+              echo "NODE_ENV=production" >> .env
+
+            echo "✅ Secrets injected into .env"
+          DEPLOY_SCRIPT
+
+      # ── Step 4: Write wallet.pem securely ──
+      - name: Write wallet PEM
+        if: ${{ secrets.WALLET_PEM != '' }}
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }} << 'PEM_SCRIPT'
+            cd ${{ env.DEPLOY_DIR }}
+            echo "${{ secrets.WALLET_PEM }}" > wallet.pem
+            chmod 600 wallet.pem
+            echo "✅ wallet.pem written (mode 600)"
+          PEM_SCRIPT
+
+      # ── Step 5: Build and deploy with zero downtime ──
+      - name: Docker Compose deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }} << 'BUILD_SCRIPT'
+            cd ${{ env.DEPLOY_DIR }}
+            docker compose pull 2>/dev/null || true
+            docker compose build --no-cache ${{ env.DOCKER_SERVICE }}
+            docker compose up -d --no-deps ${{ env.DOCKER_SERVICE }}
+            echo "⏳ Waiting for health check..."
+            sleep 5
+            docker compose ps
+            echo "✅ Deploy complete!"
+          BUILD_SCRIPT
+
+      # ── Step 6: Verify health ──
+      - name: Health check
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER || 'deploy' }}@${{ secrets.VPS_HOST }} \
+            "curl -sf http://localhost:4000/api/health || exit 1"
+
+      # ── Cleanup SSH key ──
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

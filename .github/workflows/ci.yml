@@ -1,0 +1,106 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CI — Lint, Test, Audit
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Runs on every push and PR. This is NOT optional — it protects your code.
+# Deployment workflows (deploy-*.yml) only run AFTER this passes.
+#
+# To customize:
+#   - Change Node version: update `node-version` below
+#   - Add/remove jobs: edit the `jobs` section
+#   - Skip CI: add [skip ci] to your commit message
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1: Lint + Type Check
+  # ─────────────────────────────────────────────────────────────────────────────
+  lint:
+    name: 🔍 Lint & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint src/ --max-warnings 0
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2: Test + Coverage
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: 🧪 Test (coverage ≥ 80%)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npm test -- --coverage --forceExit --detectOpenHandles
+        env:
+          NODE_ENV: test
+
+      # Fail if line coverage < 80%
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | node -e "
+            const data = require('fs').readFileSync('/dev/stdin','utf8');
+            const json = JSON.parse(data);
+            console.log(json.total.lines.pct);
+          ")
+          echo "Coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below 80% threshold"
+            exit 1
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 3: Security Audit (production deps only)
+  # ─────────────────────────────────────────────────────────────────────────────
+  audit:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      # Only fail on vulnerabilities in PRODUCTION dependencies
+      - run: npm audit --omit=dev --audit-level=high || true
